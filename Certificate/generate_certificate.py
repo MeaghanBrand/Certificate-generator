@@ -1,42 +1,22 @@
-import PIL
-from PIL import Image, ImageDraw, ImageFont
-import os
+import jinja2
+import pdfkit
+from datetime import datetime
 
-list_of_names = []
+my_name = "Meaghan"
+item_1 = "Reboot"
+item_2 = "Tv"
+item_3 = "Bed"
+todays_date = datetime.today().strftime("%d %b, %Y")
 
-
-def cleanup_data():
-    with open("name_list.txt") as file:
-        for line in file:
-            list_of_names.append(line.strip())
-            
-def generate_certificates(name, output_path="Certificate of Completion.pdf"):
-    # Load the certificate template
-    template = Image.open("CoC.png")
-    
-    # Define font and position
-    font = ImageFont.truetype("PinyonScript-Regular.ttf", 50)  # Adjust size as needed
-    draw = ImageDraw.Draw(template)
-    text_position = (500, 300)  # Adjust coordinates
-
-    # Add name to certificate
-    draw.text(text_position, name, fill="black", font=font)
-
-    # Save as PDF
-    template.save(output_path, "PDF")
-    print(f"Certificate generated for {name}!")
+context = {'my_name': my_name, 'item_1': item_1, 'item_2': item_2, 'item_3': item_3, 'todays_date': todays_date}
 
 
-# Example usage
-generate_certificates(list_of_names)
-cleanup_data()
+template_loader = jinja2.FileSystemLoader('./')
+template_env = jinja2.Environment(loader = template_loader)
 
+template = template_env.get_template("my-basic-template.html")
+output_text = template.render(context)
 
+config = pdfkit.configuration(wkhtmltopdf = "\Users\meagh\OneDrive\Documents\GitHub\Certificate-generator")
 
-
-
-#def generate_certificates():
-#    for name in list_of_names:
-#        template = pil.Image.open("CoC.png")
-#        ImageDraw.text(template, name, (420, 690), font, 5, (0, 0, 255), 5 )
-#        Image.save(f'Generated_Certificate/{name}.png', template)
+pdfkit.from_string(output_text, 'pdf_generated.pdf', configuration = config)
